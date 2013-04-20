@@ -81,6 +81,8 @@ public final class CommandLineEncoder {
       return;
     }
     
+    contents = "RICHERT IS MEGA GAY";
+    
     MultiFormatWriter barcodeWriter = new MultiFormatWriter();
     BitMatrix matrix = barcodeWriter.encode(contents, barcodeFormat, width, height);
     MatrixToImageWriter.writeToFile(matrix, imageFormat, new File(outFileString));

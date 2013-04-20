@@ -52,7 +52,7 @@ public final class TestWriter implements Writer {
             throw new IllegalArgumentException("Found empty contents");
         }
         if (format != BarcodeFormat.TEST_CODE) {
-            throw new IllegalArgumentException("Can only encode QR_CODE, but got " + format);
+            throw new IllegalArgumentException("Can only encode TEST_CODE, but got " + format);
         }
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException
