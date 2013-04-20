@@ -67,7 +67,7 @@ public final class CommandLineEncoder {
     if (DEFAULT_OUTPUT_FILE.equals(outFileString)) {
       outFileString += '.' + imageFormat.toLowerCase(Locale.ENGLISH);
     }
-        
+    
     String contents = null;
     for (String arg : args) {
       if (!arg.startsWith("--")) {

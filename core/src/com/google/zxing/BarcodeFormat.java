@@ -76,5 +76,4 @@ public enum BarcodeFormat {
   
   /** Test Format. */
   TEST_CODE
-
 }
