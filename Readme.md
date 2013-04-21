@@ -1,0 +1,1 @@
+Trying to learn more about ZXing's QRCode reader implementation by exploring the codebase.
