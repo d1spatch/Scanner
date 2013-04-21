@@ -31,12 +31,21 @@ import static com.google.zxing.qrcode.decoder.Mode.NUMERIC;
 import com.google.zxing.qrcode.decoder.Version;
 import com.google.zxing.qrcode.encoder.ByteMatrix;
 import com.google.zxing.qrcode.encoder.QRCode;
-import com.google.zxing.testcode.TestCode;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
+/*
+ * Notes: USE VERSION 12, has area you can use to box.
+ * 
+ * TODO: Nothing, this is pointless as with the error correction I'd still have to
+ * alter the code to ignore parity failures within the icon area plus this sort of screws
+ * things up for other QR code readers and my own reader if it has to switch between the two modes.
+ * Essentially this could annoy other people which may not be worth it as technically
+ * my ultimate goal is to make a less flexible, lower capacity QR Code.
+ */
 
 /**
  * @author satorux@google.com (Satoru Takabayashi) - creator
@@ -84,8 +93,8 @@ public final class Encoder {
   }
 
   public static TestCode encode(String content,
-                              ErrorCorrectionLevel ecLevel,
-                              Map<EncodeHintType,?> hints) throws WriterException {
+                                ErrorCorrectionLevel ecLevel,
+                                Map<EncodeHintType,?> hints) throws WriterException {
 
     // Determine what character encoding has been specified by the caller, if any
     String encoding = hints == null ? null : (String) hints.get(EncodeHintType.CHARACTER_SET);
@@ -127,11 +136,14 @@ public final class Encoder {
     Version provisionalVersion = chooseVersion(provisionalBitsNeeded, ecLevel);
 
     // Use that guess to calculate the right version. I am still not sure this works in 100% of cases.
-
     int bitsNeeded = headerBits.getSize()
         + mode.getCharacterCountBits(provisionalVersion)
         + dataBits.getSize();
     Version version = chooseVersion(bitsNeeded, ecLevel);
+    
+    //Override with version 12 (only one that "works" for my purposes
+    version = Version.getVersionForNumber(12);
+    //System.out.println("Version: " + version.getVersionNumber() );
 
     BitArray headerAndDataBits = new BitArray();
     headerAndDataBits.appendBitArray(headerBits);

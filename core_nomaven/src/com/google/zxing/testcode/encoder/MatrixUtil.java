@@ -31,6 +31,38 @@ final class MatrixUtil {
   private MatrixUtil() {
     // do nothing
   }
+  
+  private static int[][] buildIconPattern(int length) {
+    int[][] icon = new int[length][length];
+    
+    for(int i = 0; i < length; i++){
+        for(int j = 0; j < length; j++){
+            if( i==0 || i == length - 1 || j == 0 || j == length - 1){
+                icon[i][j] = 1;
+            }
+            else{
+                icon[i][j] = 0;
+            }
+        }
+    }
+
+    return icon;
+ }
+  
+  private static final int[][] LOOK_OF_DISAPPROVAL = {
+      {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+      {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0},
+      {0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+      {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+      {1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1},
+      {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1},
+      {0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0},
+      {0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}
+  };
 
   private static final int[][] POSITION_DETECTION_PATTERN =  {
       {1, 1, 1, 1, 1, 1, 1},
@@ -137,12 +169,13 @@ final class MatrixUtil {
                           ByteMatrix matrix) throws WriterException {
     clearMatrix(matrix);
     embedBasicPatterns(version, matrix);
+    
     // Type information appear with any version.
     embedTypeInfo(ecLevel, maskPattern, matrix);
     // Version info appear if version >= 7.
     maybeEmbedVersionInfo(version, matrix);
     // Data should be embedded at end.
-    embedDataBits(dataBits, maskPattern, matrix);
+    //embedDataBits(dataBits, maskPattern, matrix);
   }
 
   // Embed basic patterns. On success, modify the matrix and return true.
@@ -161,6 +194,8 @@ final class MatrixUtil {
     maybeEmbedPositionAdjustmentPatterns(version, matrix);
     // Timing patterns should be embedded after position adj. patterns.
     embedTimingPatterns(matrix);
+    
+    embedIcon(version, matrix);
   }
 
   // Embed type information. On success, modify the matrix.
@@ -264,6 +299,53 @@ final class MatrixUtil {
     if (bitIndex != dataBits.getSize()) {
       throw new WriterException("Not all bits consumed: " + bitIndex + '/' + dataBits.getSize());
     }
+  }
+  
+  private static void embedIcon(Version version, ByteMatrix matrix) {
+    if (version.getVersionNumber() < 2   )  return;
+    if( version.getVersionNumber() != 12 )  return;
+    
+    int index = version.getVersionNumber() - 1;
+    int[] coordinates = POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE[index];
+    int numCoordinates = POSITION_ADJUSTMENT_PATTERN_COORDINATE_TABLE[index].length;
+    
+    int b1 = 0;
+    int b2 = 0;
+    
+    for (int i = 0; i < numCoordinates; ++i) {
+      if( coordinates[i] == -1 )
+          break;
+      b2 = b1;
+      b1 = coordinates[i];
+    }
+    
+    //b2 += 2; 
+    int length = b1 - b2 + 1;
+    //length = 22;
+    int[][] ICON_PATTERN = buildIconPattern(length);
+
+    for (int y = 0; y < length; ++y) {
+      for (int x = 0; x < length; ++x) {
+          if (isEmpty(matrix.get(b2 + x, b2 + y))) {
+            matrix.set(b2 + x, b2 + y, ICON_PATTERN[y][x]);
+          }
+      }
+    }
+    
+    int lodx = b2 + 3;
+    int lody = b2 + length / 4;
+    
+    //System.out.println("LOOK_OF_DISAPPROVAL.length: " + LOOK_OF_DISAPPROVAL.length);
+    //System.out.println("LOOK_OF_DISAPPROVAL[0].length: " + LOOK_OF_DISAPPROVAL[0].length);
+    
+    for (int y = 0; y < LOOK_OF_DISAPPROVAL.length; ++y) {
+      for (int x = 0; x < LOOK_OF_DISAPPROVAL[0].length; ++x) {
+        matrix.set(lodx + x, lody + y, LOOK_OF_DISAPPROVAL[y][x]);
+      }
+    }
+    
+    
+    
   }
 
   // Return the position of the most significant bit set (to one) in the "value". The most
@@ -422,6 +504,14 @@ final class MatrixUtil {
       }
     }
   }
+  
+  private static void embedIconPattern(int xStart, int yStart, ByteMatrix matrix){
+    for (int y = 0; y < 7; ++y) {
+      for (int x = 0; x < 7; ++x) {
+        matrix.set(xStart + x, yStart + y, POSITION_DETECTION_PATTERN[y][x]);
+      }
+    }  
+  }
 
   // Embed position detection patterns and surrounding vertical/horizontal separators.
   private static void embedPositionDetectionPatternsAndSeparators(ByteMatrix matrix) throws WriterException {
@@ -479,5 +569,4 @@ final class MatrixUtil {
       }
     }
   }
-
 }

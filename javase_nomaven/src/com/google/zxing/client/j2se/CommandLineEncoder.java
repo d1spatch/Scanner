@@ -81,11 +81,16 @@ public final class CommandLineEncoder {
       return;
     }
     
-    contents = "RICHERT IS MEGA GAY";
+    
+    contents = "pie";
+    //contents = "There is nothing in the world more hateful and misunderstood than the misery of a pointless man. So dark the con of man who lays his life on the line for victory. The End.";
+    //contents = "There is nothing in the world more hateful and misunderstood than the misery of a pointless man. So dark the con of man who lays his life on the line for victory. The End.There is nothing in the world more hateful and misunderstood than the misery of a pointless man. So dark the con of man who lays his life on the line for victory. The End.";
     
     MultiFormatWriter barcodeWriter = new MultiFormatWriter();
     BitMatrix matrix = barcodeWriter.encode(contents, barcodeFormat, width, height);
     MatrixToImageWriter.writeToFile(matrix, imageFormat, new File(outFileString));
+    
+    //System.out.println(matrix.toString());
   }
 
   private static void printUsage() {

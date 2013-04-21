@@ -27,7 +27,7 @@ public enum BarcodeFormat {
   AZTEC,
 
   /** CODABAR 1D format. */
-  CODABAR,
+  CODABAR, //works fast
 
   /** Code 39 1D format. */
   CODE_39,
@@ -39,7 +39,7 @@ public enum BarcodeFormat {
   CODE_128,
 
   /** Data Matrix 2D barcode format. */
-  DATA_MATRIX,
+  DATA_MATRIX, // actually works
 
   /** EAN-8 1D format. */
   EAN_8,
@@ -51,13 +51,13 @@ public enum BarcodeFormat {
   ITF,
 
   /** MaxiCode 2D barcode format. */
-  MAXICODE,
+  MAXICODE, // could not get to work
 
   /** PDF417 format. */
   PDF_417,
 
   /** QR Code 2D barcode format. */
-  QR_CODE,
+  QR_CODE, // works really fast compared to others
 
   /** RSS 14 */
   RSS_14,
